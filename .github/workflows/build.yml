@@ -1,10 +1,6 @@
 name: CI сборка для проекта
 
 on:
-  pull_request:
-    branches:
-      - 'master'
-      - 'i[0-9]+-*'
   push:
     branches:
       - 'master'
@@ -36,6 +32,9 @@ jobs:
 
       - name: Предоставление прав для gradlew
         run: chmod +x gradlew
+
+      - name: Проверка EditorConfig
+        run: gregmckeachie/editorconfig-checker@v1.0.1
 
       - name: Запустить тесты
         run: ./gradlew test

@@ -19,3 +19,4 @@ public class MainTest {
         assertDoesNotThrow(() -> Main.main(new String[]{}));
     }
 }
+
