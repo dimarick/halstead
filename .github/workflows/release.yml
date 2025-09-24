@@ -56,3 +56,4 @@ jobs:
           files: release/halstead-${{ env.TAG_NAME }}.jar
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
