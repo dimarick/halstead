@@ -34,7 +34,11 @@ jobs:
         run: chmod +x gradlew
 
       - name: Проверка EditorConfig
-        run: ./ec-linux-amd64 -config .editorconfig
+        run: |
+            # Установка editorconfig-checker
+            curl -Ls https://github.com/editorconfig-checker/editorconfig-checker/releases/download/2.7.0/ec-linux-amd64.tar.gz | tar xz
+            # Запуск проверки с использованием .editorconfig файла из репозитория
+            ./ec-linux-amd64 -config .editorconfig
 
       - name: Запустить тесты
         run: ./gradlew test
