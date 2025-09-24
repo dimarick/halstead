@@ -34,7 +34,8 @@ jobs:
         run: chmod +x gradlew
 
       - name: Проверка EditorConfig
-        run: gregmckeachie/editorconfig-checker@v1.0.1
+        run: curl -Ls https://github.com/editorconfig-checker/editorconfig-checker/releases/download/2.7.0/ec-linux-amd64.tar.gz | tar xz
+          ./ec-linux-amd64 -disable-end-of-line
 
       - name: Запустить тесты
         run: ./gradlew test
