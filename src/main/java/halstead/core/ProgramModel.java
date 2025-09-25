@@ -1,6 +1,15 @@
 package halstead.core;
 
+import halstead.dto.EstimationProgramModel;
+
 public class ProgramModel {
+    public EstimationProgramModel estimate(int countInputParams, int countOutputParams, double abstractionLevel) {
+        double programVolume = getProgramVolume(countInputParams, countOutputParams);
+        double bugCount = getBugCount(programVolume, abstractionLevel);
+
+        return new  EstimationProgramModel(programVolume, bugCount);
+    }
+
     /**
      * Метод для расчёта потенциального объёма программы (на потенциальном языке, т.е. функции заранее определены)
      * @param countInputParams количество входных параметров модели

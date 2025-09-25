@@ -1,6 +1,21 @@
 package halstead.core;
 
+import halstead.dto.EstimationModuleProgramModel;
+
 public class ModuleProgramModel {
+
+    public EstimationModuleProgramModel estimate(int countInputParams, int countOutputParams, int teamSize, int teamAvgPerformance) {
+        double moduleCount = getCount(countInputParams, countOutputParams);
+        double programSize = getProgramSize(moduleCount);
+        double programVolume = getProgramVolume(moduleCount);
+        double assemblerInstructions = getAssemblerInstructions(moduleCount);
+        double projectTime = getProgramProjectTime(programSize, teamSize, teamAvgPerformance);
+        double bugCount = getProgramBugCount(moduleCount);
+        double meanTimeToFailure = getProgramMeanTimeToFailure(projectTime, programSize, programVolume);
+
+        return new EstimationModuleProgramModel(moduleCount, programSize, programVolume, assemblerInstructions, projectTime, bugCount, meanTimeToFailure);
+    }
+
     /**
      * Метод для расчёта числа модулей
      * @param countInputParams количество входных параметров

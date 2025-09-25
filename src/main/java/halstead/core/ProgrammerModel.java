@@ -1,5 +1,6 @@
 package halstead.core;
 
+import halstead.dto.EstimationProgrammerModel;
 import halstead.dto.ProgramStat;
 
 public class ProgrammerModel {
@@ -7,6 +8,13 @@ public class ProgrammerModel {
         LAMBDA_PLUS_R,
         LAMBDA_TIMES_R,
         INV_LAMBDA_INV_R
+    }
+
+    public EstimationProgrammerModel estimate(double initialRating, double abstractionLevel, double programVolume, CoefficientType type, ProgramStat[] programStats) {
+        double currentRating = getRating(initialRating, abstractionLevel, type, programStats);
+        double estimatedBugsCount = getBugForecast(currentRating, abstractionLevel, programVolume, type);
+
+        return new EstimationProgrammerModel(currentRating, estimatedBugsCount);
     }
 
     private static double getCoefficient(double abstractionLevel, CoefficientType type, double rating) {
