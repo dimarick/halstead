@@ -19,9 +19,9 @@ public class ProgrammerModel {
 
     private static double getCoefficient(double abstractionLevel, CoefficientType type, double rating) {
         return switch (type) {
-            case CoefficientType.LAMBDA_PLUS_R -> abstractionLevel + rating;
-            case CoefficientType.LAMBDA_TIMES_R -> abstractionLevel * rating;
-            case CoefficientType.INV_LAMBDA_INV_R -> 1.0 / abstractionLevel + 1.0 / rating;
+            case LAMBDA_PLUS_R -> abstractionLevel + rating;
+            case LAMBDA_TIMES_R -> abstractionLevel * rating;
+            case INV_LAMBDA_INV_R -> 1.0 / abstractionLevel + 1.0 / rating;
         };
     }
 
