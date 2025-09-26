@@ -1,29 +1,28 @@
 package halstead.core;
 
-import halstead.dto.EstimationProgramModel;
-
 public class ProgramModel {
-    public EstimationProgramModel estimate(int countInputParams, int countOutputParams, double abstractionLevel) {
-        double programVolume = getProgramVolume(countInputParams, countOutputParams);
-        double bugCount = getBugCount(programVolume, abstractionLevel);
-
-        return new  EstimationProgramModel(programVolume, bugCount);
+    private static void checkParams(String paramName, double value) {
+        if (value <= 0) {
+            throw new IllegalArgumentException(
+                String.format("Параметр %s должен быть > 0, переданное значение: %.2f",  paramName, value)
+            );
+        }
     }
 
     /**
      * Метод для расчёта потенциального объёма программы (на потенциальном языке, т.е. функции заранее определены)
      * @param countInputParams количество входных параметров модели
-     * @param countOutputParams количество выходных параметров модели
+     * @param countOutputParams количество выходных параметров моделип
      * @return ArgumentException или потенциальный объём программы, т.е. максимально компактный текст программы
      */
     public double getProgramVolume(int countInputParams, int countOutputParams) {
-        if (countInputParams < 0 || countOutputParams < 0) {
-            throw new IllegalArgumentException("Параметры не могут быть отрицательными");
-        }
+        checkParams("countInputParams", countInputParams);
+        checkParams("countOutputParams", countOutputParams);
+
         int nStar = countInputParams + countOutputParams;
         // 2 добавляется, потому что в потенциальном языке нужно 2 оператора: функция и присваивание
         double x = nStar + 2.0;
-        // log_2(x) = ln(x)/ln(2)
+        // log_2(x) = log(x)/log(2)
         return x * (Math.log(x) / Math.log(2));
     }
 
@@ -34,9 +33,7 @@ public class ProgramModel {
      * @return ArgumentException или потенциальное число ошибок
      */
     public double getBugCount(double programVolume, double abstractionLevel) {
-        if (abstractionLevel <= 0.0) {
-            throw new IllegalArgumentException("Уровень реализации языка должен быть > 0");
-        }
+        checkParams("abstractionLevel", abstractionLevel);
 
         // 3000 здесь – эмпирический коэффициент Холстеда, описание программы на английском языке
         // или же время мысленных различий при работе над программой

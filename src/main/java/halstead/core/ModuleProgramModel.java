@@ -1,20 +1,14 @@
 package halstead.core;
 
-import halstead.dto.EstimationModuleProgramModel;
-
 public class ModuleProgramModel {
-
-    public EstimationModuleProgramModel estimate(int countInputParams, int countOutputParams, int teamSize, int teamAvgPerformance) {
-        double moduleCount = getCount(countInputParams, countOutputParams);
-        double programSize = getProgramSize(moduleCount);
-        double programVolume = getProgramVolume(moduleCount);
-        double assemblerInstructions = getAssemblerInstructions(moduleCount);
-        double projectTime = getProgramProjectTime(programSize, teamSize, teamAvgPerformance);
-        double bugCount = getProgramBugCount(moduleCount);
-        double meanTimeToFailure = getProgramMeanTimeToFailure(projectTime, programSize, programVolume);
-
-        return new EstimationModuleProgramModel(moduleCount, programSize, programVolume, assemblerInstructions, projectTime, bugCount, meanTimeToFailure);
+    private static void checkParams(String paramName, double value) {
+        if (value <= 0) {
+            throw new IllegalArgumentException(
+                String.format("Параметр %s должен быть > 0, переданное значение: %.2f",  paramName, value)
+            );
+        }
     }
+
 
     /**
      * Метод для расчёта числа модулей
@@ -23,9 +17,9 @@ public class ModuleProgramModel {
      * @return ArgumentException или число модулей double, в зависимости от числа уровней
      */
     public double getCount(int countInputParams, int countOutputParams) {
-        if (countInputParams < 0 || countOutputParams < 0) {
-            throw new IllegalArgumentException("Параметры не могут быть отрицательными");
-        }
+        checkParams("countInputParams", countInputParams);
+        checkParams("countOutputParams", countOutputParams);
+
         int nStar = countInputParams + countOutputParams;
         double k = nStar / 8.0;
 
@@ -71,7 +65,7 @@ public class ModuleProgramModel {
      * @return Время для написания программы, в единицах измерения (обычно дни)
      */
     public double getProgramProjectTime(double moduleProgramSize, double programmerTeamSize, double programmerAvgPerformance) {
-        return (3 * moduleProgramSize) / (8 * programmerTeamSize * programmerAvgPerformance);
+        return  getAssemblerInstructions(moduleProgramSize) / (programmerTeamSize * programmerAvgPerformance);
     }
 
     /**
@@ -91,7 +85,7 @@ public class ModuleProgramModel {
      * @return время наработки на отказ (время до первого сбоя), в часах
      */
     public double getProgramMeanTimeToFailure(double dayLength, double moduleProgramProjectTime, double moduleProgramBugCount) {
-        double daysLengthInHours = dayLength * moduleProgramProjectTime;
-        return daysLengthInHours / (2 * Math.log(moduleProgramBugCount));
+        double projectTimeHours = dayLength * moduleProgramProjectTime;
+        return projectTimeHours / (2 * Math.log(moduleProgramBugCount));
     }
 }
