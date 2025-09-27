@@ -5,19 +5,42 @@ import halstead.core.ProgramModel;
 import halstead.core.ProgrammerModel;
 import halstead.dto.ProgramStat;
 
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.Arrays;
+import java.util.Objects;
+import java.util.Properties;
+
 public class Main {
+
+    private static final String CONFIG_FILE_NAME = "config.properties";
+
     public static void main(String[] args) {
-        System.out.println("Демонстрация расчетов по метрикам Холстеда");
-        System.out.println("======================================================================");
+        var properties = new Properties();
+
+        try (InputStream in = Main.class.getClassLoader().getResourceAsStream(CONFIG_FILE_NAME)) {
+            if (in == null) {
+                System.out.println("Ошибка: Не удалось найти файл конфигурации: " + CONFIG_FILE_NAME);
+                throw new FileNotFoundException(CONFIG_FILE_NAME);
+            }
+            properties.load(in);
+        } catch (IOException e) {
+            System.out.println("Ошибка: Не удалось прочитать файл конфигурации: " + CONFIG_FILE_NAME);
+            throw new RuntimeException(e);
+        }
+
+        System.out.println("\n----- Демонстрация расчетов по метрикам Холстеда -----\n");
+        System.out.println("=======================================================");
 
         // Задание № 1
         System.out.println("\n--- Задание № 1: Оценка потенциального числа ошибок ---\n");
         var programModel = new ProgramModel();
 
         // Входные данные
-        var inputParams = 0; // Число входных параметров (n)
-        var outputParams = 0; // Число выходных параметров (n2)
-        var abstractionLevel = 0; // Уровень языка (λ)
+        var inputParams = Integer.parseInt(properties.getProperty("task1.inputParams")); // Число входных параметров (n)
+        var outputParams = Integer.parseInt(properties.getProperty("task1.outputParams")); // Число выходных параметров (n2)
+        var abstractionLevel = Double.parseDouble(properties.getProperty("task1.abstractionLevel")); // Уровень языка (λ)
 
         double programVolume = programModel.getProgramVolume(inputParams, outputParams);
         System.out.println("Расчетный потенциал объема программы (V*): " + programVolume);
@@ -30,13 +53,11 @@ public class Main {
         var moduleProgramModel =  new ModuleProgramModel();
 
         // Входные данные
-        var inputParamsForModules = 0; // Число входных параметров (n)
-        var outputParamsForModules = 0; // Число выходных параметров (n2)
-        var moduleCount = 0; // Условное количество модулей (K)
-        var teamSize = 0; // Количество программистов в бригаде (m)
-        var avgPerformance = 0; // Производительность (v)
+        var moduleCount = Double.parseDouble(properties.getProperty("task2.moduleCount")); // Условное количество модулей (K)
+        var teamSize = Integer.parseInt(properties.getProperty("task2.teamSize")); // Количество программистов в бригаде (m)
+        var avgPerformance = Double.parseDouble(properties.getProperty("task2.avgPerformance")); // Производительность (v)
 
-        double calculatedModuleCount = moduleProgramModel.getCount(inputParamsForModules, outputParamsForModules);
+        double calculatedModuleCount = moduleProgramModel.getCount(inputParams, outputParams);
         System.out.println("Расчетное количество модулей (K): " + calculatedModuleCount);
 
         double programSize = moduleProgramModel.getProgramSize(moduleCount);
@@ -61,14 +82,9 @@ public class Main {
         System.out.println("\n--- Задание № 3: Оценка рейтинга программиста ---\n");
 
         // Входные данные
-        var initialRating = 0; // Начальный рейтинг R0
-        var newProgramVolume = 0; // Объем программы в Кбайт
-        ProgramStat[] stats = {
-            new ProgramStat(0,0),
-            new ProgramStat(0,0),
-            new ProgramStat(0,0),
-            new ProgramStat(0,0)
-        };
+        var initialRating = Double.parseDouble(properties.getProperty("task3.initialRating")); // Начальный рейтинг R0
+        var newProgramVolume = Double.parseDouble(properties.getProperty("task3.newProgramVolume")); // Объем программы в Кбайт
+        ProgramStat[] stats = parseProgramStats(properties.getProperty("task3.programStats"));
 
         double newRating = ProgrammerModel.getRating(initialRating, abstractionLevel, stats);
         System.out.println("Новый рейтинг программиста (Ri): " + newRating);
@@ -76,6 +92,28 @@ public class Main {
         double bugForecast = ProgrammerModel.getBugForecast(newRating, abstractionLevel, newProgramVolume);
         System.out.println("Ожидаемое число ошибок в новой программе (B_n+1): " + bugForecast);
 
-        System.out.println("\n======================================================================");
+        System.out.println("\n=======================================================");
+    }
+
+    private static ProgramStat[] parseProgramStats(String statsString) {
+        if (statsString == null || statsString.isEmpty()) {
+            return new ProgramStat[0];
+        }
+
+        return Arrays.stream(statsString.split(";"))
+            .map(String::trim)
+            .map(pair -> pair.split(","))
+            .filter(values -> values.length == 2)
+            .map(values -> {
+                try {
+                    int size = Integer.parseInt(values[0].trim());
+                    int bugCount = Integer.parseInt(values[1].trim());
+                    return new ProgramStat(size, bugCount);
+                }  catch (NumberFormatException e) {
+                    return null;
+                }
+            })
+            .filter(Objects::nonNull)
+            .toArray(ProgramStat[]::new);
     }
 }
