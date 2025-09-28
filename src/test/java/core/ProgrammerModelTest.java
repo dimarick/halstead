@@ -102,5 +102,34 @@ public class ProgrammerModelTest {
             "Если багов больше прогноза, рейтинг должен падать (" + type + ")");
     }
 
+    @ParameterizedTest
+    @EnumSource(ProgrammerModel.CoefficientType.class)
+    void testRatingConsistency(ProgrammerModel.CoefficientType type) {
+        ProgrammerModel model = new ProgrammerModel(1.5, type);
+
+        ProgramStat[] stats = {
+            new ProgramStat(2, 0),
+            new ProgramStat(3, 0),
+            new ProgramStat(4, 3),
+            new ProgramStat(5, 4)
+        };
+
+        double initialRating = 1000;
+
+        double rFull = model.getRating(initialRating, stats);
+
+        double rStep = initialRating;
+        for (ProgramStat ps : stats) {
+            rStep = model.getRating(rStep, new ProgramStat[]{ps});
+        }
+
+        double rSplit = model.getRating(initialRating, new ProgramStat[]{stats[0], stats[1]});
+        rSplit = model.getRating(rSplit, new ProgramStat[]{stats[2], stats[3]});
+
+        assertEquals(rFull, rStep, 1e-6,
+            "Результат должен быть одинаковым при последовательном применении");
+        assertEquals(rFull, rSplit, 1e-6,
+            "Результат должен быть одинаковым при разбиении на пакеты");
+    }
 
 }
