@@ -19,8 +19,8 @@ public class ProgrammerModel {
 
     private double getCoefficient(double abstractionLevel, CoefficientType type, double rating) {
         return switch (type) {
-            case LAMBDA_PLUS_R -> abstractionLevel + rating;
-            case LAMBDA_TIMES_R -> abstractionLevel * rating;
+            case LAMBDA_PLUS_R -> 1 / (abstractionLevel + rating);
+            case LAMBDA_TIMES_R -> 1 / (abstractionLevel * rating);
             case INV_LAMBDA_INV_R -> 1.0 / abstractionLevel + 1.0 / rating;
         };
     }
@@ -32,19 +32,25 @@ public class ProgrammerModel {
      * @return рейтинг в i момент времени
      */
     public double getRating(double initialRating, ProgramStat[] programStats) {
-        double rPrev = initialRating;
-
-        for (ProgramStat ps: programStats) {
-            double bugCount = ps.getBugCount();
-            double c = getCoefficient(abstractionLevel, type, rPrev);
-            if (c == 0) c = 1e-6;
-
-            double deltaBc = bugCount > 0 ? (bugCount / c) : 0.0;
-
-            rPrev = rPrev * (1 + 1e-3 * (ps.getSize() - deltaBc));
-        }
-        return rPrev;
+        return getRatingRecursive(initialRating, programStats, 0);
     }
+
+    private double getRatingRecursive(double rPrev, ProgramStat[] programStats, int index) {
+        if (index >= programStats.length) {
+            return rPrev;
+        }
+
+        ProgramStat ps = programStats[index];
+        double bugCount = ps.getBugCount();
+        double c = getCoefficient(abstractionLevel, type, rPrev);
+        if (c == 0) c = 1e-6;
+
+        double deltaBc = bugCount > 0 ? (bugCount / c) : 0.0;
+        double rNext = rPrev * (1 + 1e-3 * (ps.getSize() - deltaBc));
+
+        return getRatingRecursive(rNext, programStats, index + 1);
+    }
+
 
     /**
      * Метод для расчёта ожидаемого числа ошибок
