@@ -5,28 +5,27 @@ import halstead.core.ProgramModel;
 import halstead.core.ProgrammerModel;
 import halstead.dto.ProgramStat;
 
-import java.io.FileNotFoundException;
+import java.io.FileInputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.util.Arrays;
 import java.util.Objects;
 import java.util.Properties;
 
 public class Main {
 
-    private static final String CONFIG_FILE_NAME = "config.properties";
-
     public static void main(String[] args) {
+        if (args.length == 0) {
+            System.out.println("Ошибка: Укажите путь к файлу конфигурации в качестве аргумента командной строки.");
+            return;
+        }
+
+        String configFilePath = args[0];
         var properties = new Properties();
 
-        try (InputStream in = Main.class.getClassLoader().getResourceAsStream(CONFIG_FILE_NAME)) {
-            if (in == null) {
-                System.out.println("Ошибка: Не удалось найти файл конфигурации: " + CONFIG_FILE_NAME);
-                throw new FileNotFoundException(CONFIG_FILE_NAME);
-            }
-            properties.load(in);
+        try (FileInputStream fis = new FileInputStream(configFilePath)) {
+            properties.load(fis);
         } catch (IOException e) {
-            System.out.println("Ошибка: Не удалось прочитать файл конфигурации: " + CONFIG_FILE_NAME);
+            System.out.println("Ошибка: Не удалось прочитать файл конфигурации: " + configFilePath);
             throw new RuntimeException(e);
         }
 
@@ -80,16 +79,17 @@ public class Main {
 
         // Задание № 3
         System.out.println("\n--- Задание № 3: Оценка рейтинга программиста ---\n");
+        var programmerModel = new ProgrammerModel();
 
         // Входные данные
         var initialRating = Double.parseDouble(properties.getProperty("task3.initialRating")); // Начальный рейтинг R0
         var newProgramVolume = Double.parseDouble(properties.getProperty("task3.newProgramVolume")); // Объем программы в Кбайт
         ProgramStat[] stats = parseProgramStats(properties.getProperty("task3.programStats"));
 
-        double newRating = ProgrammerModel.getRating(initialRating, abstractionLevel, stats);
+        double newRating = programmerModel.getRating(initialRating, abstractionLevel, stats);
         System.out.println("Новый рейтинг программиста (Ri): " + newRating);
 
-        double bugForecast = ProgrammerModel.getBugForecast(newRating, abstractionLevel, newProgramVolume);
+        double bugForecast = programmerModel.getBugForecast(newRating, abstractionLevel, newProgramVolume);
         System.out.println("Ожидаемое число ошибок в новой программе (B_n+1): " + bugForecast);
 
         System.out.println("\n=======================================================");
