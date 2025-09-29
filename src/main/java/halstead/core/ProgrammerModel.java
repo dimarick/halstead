@@ -45,24 +45,34 @@ public class ProgrammerModel {
      * @return рейтинг в i момент времени
      */
     public double getRating(double initialRating, ProgramStat[] programStats) {
-        double currentRating = initialRating;
+        if (programStats.length == 0) {
+            return initialRating;
+        }
+
         double totalVolume = 0.0;
         double totalAdjustedBugs = 0.0;
 
-        for (int i = 0; i< programStats.length; i++) {
+        for (int i = 0; i < programStats.length; i++) {
             ProgramStat ps = programStats[i];
             double bugCount = ps.getBugCount();
-            double c = getCoefficient(abstractionLevel, type, getRating(initialRating, Arrays.copyOfRange(programStats, 0, i)));
+            double c = getCoefficient(
+                abstractionLevel,
+                type,
+                getRating(
+                    initialRating,
+                    Arrays.stream(programStats)
+                        .limit(i)
+                        .filter(stat -> stat.getBugCount() > 0)
+                        .toArray(ProgramStat[]::new)
+                )
+            );
 
-            double deltaBc = bugCount / c;
-            //totalAdjustedBugs += (bugCount / c);
-            //totalVolume += ps.getSize();
-            currentRating = currentRating * (1 + 1e-3 * (ps.getSize() - deltaBc));
+            totalAdjustedBugs += (bugCount / c);
+            totalVolume += ps.getSize();
         }
-        //currentRating = currentRating * (1 + 1e-3 * (totalVolume - totalAdjustedBugs));
-        return currentRating;
-    }
 
+        return initialRating * (1 + 1e-3 * (totalVolume - totalAdjustedBugs));
+    }
 
     /**
      * Метод для расчёта ожидаемого числа ошибок
