@@ -21,9 +21,20 @@ public class ProgrammerModel {
 
     private double getCoefficient(double abstractionLevel, CoefficientType type, double rating) {
         return switch (type) {
-            case LAMBDA_PLUS_R -> 1 / (abstractionLevel + rating);
-            case LAMBDA_TIMES_R -> 1 / (abstractionLevel * rating);
-            case INV_LAMBDA_INV_R -> 1.0 / abstractionLevel + 1.0 / rating;
+            case LAMBDA_PLUS_R -> {
+                double divider = abstractionLevel + rating;
+                yield divider == 0 ? Double.POSITIVE_INFINITY : 1 / divider;
+            }
+            case LAMBDA_TIMES_R -> {
+                double divider = abstractionLevel * rating;
+                yield divider == 0 ? Double.POSITIVE_INFINITY : 1 / divider;
+            }
+            case INV_LAMBDA_INV_R -> {
+                if (abstractionLevel == 0 || rating == 0) {
+                    yield Double.POSITIVE_INFINITY;
+                }
+                yield 1.0 / abstractionLevel + 1.0 / rating;
+            }
         };
     }
 
@@ -35,17 +46,20 @@ public class ProgrammerModel {
      */
     public double getRating(double initialRating, ProgramStat[] programStats) {
         double currentRating = initialRating;
+        double totalVolume = 0.0;
+        double totalAdjustedBugs = 0.0;
 
         for (int i = 0; i< programStats.length; i++) {
             ProgramStat ps = programStats[i];
             double bugCount = ps.getBugCount();
             double c = getCoefficient(abstractionLevel, type, getRating(initialRating, Arrays.copyOfRange(programStats, 0, i)));
-            if (c == 0) c = 1e-6;
 
-            double deltaBc = bugCount > 0 ? (bugCount / c) : 0.0;
+            double deltaBc = bugCount / c;
+            //totalAdjustedBugs += (bugCount / c);
+            //totalVolume += ps.getSize();
             currentRating = currentRating * (1 + 1e-3 * (ps.getSize() - deltaBc));
         }
-
+        //currentRating = currentRating * (1 + 1e-3 * (totalVolume - totalAdjustedBugs));
         return currentRating;
     }
 
