@@ -2,6 +2,8 @@ package halstead.core;
 
 import halstead.dto.ProgramStat;
 
+import java.util.Arrays;
+
 public class ProgrammerModel {
     public enum CoefficientType {
         LAMBDA_PLUS_R,
@@ -32,23 +34,19 @@ public class ProgrammerModel {
      * @return рейтинг в i момент времени
      */
     public double getRating(double initialRating, ProgramStat[] programStats) {
-        return getRatingRecursive(initialRating, programStats, 0);
-    }
+        double currentRating = initialRating;
 
-    private double getRatingRecursive(double rPrev, ProgramStat[] programStats, int index) {
-        if (index >= programStats.length) {
-            return rPrev;
+        for (int i = 0; i< programStats.length; i++) {
+            ProgramStat ps = programStats[i];
+            double bugCount = ps.getBugCount();
+            double c = getCoefficient(abstractionLevel, type, getRating(initialRating, Arrays.copyOfRange(programStats, 0, i)));
+            if (c == 0) c = 1e-6;
+
+            double deltaBc = bugCount > 0 ? (bugCount / c) : 0.0;
+            currentRating = currentRating * (1 + 1e-3 * (ps.getSize() - deltaBc));
         }
 
-        ProgramStat ps = programStats[index];
-        double bugCount = ps.getBugCount();
-        double c = getCoefficient(abstractionLevel, type, rPrev);
-        if (c == 0) c = 1e-6;
-
-        double deltaBc = bugCount > 0 ? (bugCount / c) : 0.0;
-        double rNext = rPrev * (1 + 1e-3 * (ps.getSize() - deltaBc));
-
-        return getRatingRecursive(rNext, programStats, index + 1);
+        return currentRating;
     }
 
 
