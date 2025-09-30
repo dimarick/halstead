@@ -46,6 +46,7 @@ public class Main {
 
         double bugCount = programModel.getBugCount(programVolume, abstractionLevel);
         System.out.println("Расчетное потенциальное число ошибок (B): " + bugCount);
+        System.out.println("\n=======================================================");
 
         // Задание № 2
         System.out.println("\n--- Задание № 2: Расчет структурных параметров ---\n");
@@ -74,22 +75,47 @@ public class Main {
         double programBugCount = moduleProgramModel.getProgramBugCount(moduleCount);
         System.out.println("Расчетное потенциальное количество ошибок (B): " + programBugCount);
 
-        double programMeanTimeToFailure = moduleProgramModel.getProgramMeanTimeToFailure(moduleCount);
+        double programMeanTimeToFailure = moduleProgramModel.getProgramMeanTimeToFailure(8, programProjectTime, programBugCount);
         System.out.println("Расчетное начальное время наработки на отказ (tн): " + programMeanTimeToFailure);
+        System.out.println("\n=======================================================");
 
         // Задание № 3
-        System.out.println("\n--- Задание № 3: Оценка рейтинга программиста ---\n");
-        var programmerModel = new ProgrammerModel();
+        System.out.println("\n--- Задание № 3: Расчет рейтинга программиста ---\n");
+        // Пример коэффициента LAMBDA_PLUS_R
+        System.out.println("\n--- Коэффициент 1/ (lambda + R) ---\n");
+        var programmerModel = new ProgrammerModel(abstractionLevel, ProgrammerModel.CoefficientType.LAMBDA_PLUS_R);
 
         // Входные данные
         var initialRating = Double.parseDouble(properties.getProperty("task3.initialRating")); // Начальный рейтинг R0
         var newProgramVolume = Double.parseDouble(properties.getProperty("task3.newProgramVolume")); // Объем программы в Кбайт
         ProgramStat[] stats = parseProgramStats(properties.getProperty("task3.programStats"));
 
-        double newRating = programmerModel.getRating(initialRating, abstractionLevel, stats);
+        double newRating = programmerModel.getRating(initialRating, stats);
         System.out.println("Новый рейтинг программиста (Ri): " + newRating);
 
-        double bugForecast = programmerModel.getBugForecast(newRating, abstractionLevel, newProgramVolume);
+        double bugForecast = programmerModel.getBugForecast(newRating, newProgramVolume);
+        System.out.println("Ожидаемое число ошибок в новой программе (B_n+1): " + bugForecast);
+
+        System.out.println("\n=======================================================");
+
+        // Пример коэффициента LAMBDA_TIMES_R
+        System.out.println("\n--- Коэффициент 1 / (lambda * R) ---\n");
+        programmerModel = new ProgrammerModel(abstractionLevel, ProgrammerModel.CoefficientType.LAMBDA_TIMES_R);
+        newRating = programmerModel.getRating(initialRating, stats);
+        System.out.println("Новый рейтинг программиста (Ri): " + newRating);
+
+        bugForecast = programmerModel.getBugForecast(newRating, newProgramVolume);
+        System.out.println("Ожидаемое число ошибок в новой программе (B_n+1): " + bugForecast);
+
+        System.out.println("\n=======================================================");
+
+        // Пример коэффициента INV_LAMBDA_INV_R
+        System.out.println("\n--- Коэффициент 1/lambda + 1/R ---\n");
+        programmerModel = new ProgrammerModel(abstractionLevel, ProgrammerModel.CoefficientType.INV_LAMBDA_INV_R);
+        newRating = programmerModel.getRating(initialRating, stats);
+        System.out.println("Новый рейтинг программиста (Ri): " + newRating);
+
+        bugForecast = programmerModel.getBugForecast(newRating, newProgramVolume);
         System.out.println("Ожидаемое число ошибок в новой программе (B_n+1): " + bugForecast);
 
         System.out.println("\n=======================================================");
