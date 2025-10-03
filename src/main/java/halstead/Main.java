@@ -72,7 +72,7 @@ public class Main {
         double programProjectTime = moduleProgramModel.getProgramProjectTime(moduleCount, teamSize, avgPerformance);
         System.out.println("Расчетное календарное время программирования (Tk): " + programProjectTime);
 
-        double programBugCount = moduleProgramModel.getProgramBugCount(moduleCount);
+        double programBugCount = moduleProgramModel.getProgramBugCount(moduleVolume);
         System.out.println("Расчетное потенциальное количество ошибок (B): " + programBugCount);
 
         double programMeanTimeToFailure = moduleProgramModel.getProgramMeanTimeToFailure(8, programProjectTime, programBugCount);
